@@ -1,0 +1,3 @@
+/home/govdz/Desktop/INF301/cmake-build-debug/CMakeFiles/INF301.dir
+/home/govdz/Desktop/INF301/cmake-build-debug/CMakeFiles/edit_cache.dir
+/home/govdz/Desktop/INF301/cmake-build-debug/CMakeFiles/rebuild_cache.dir
