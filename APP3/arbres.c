@@ -91,6 +91,9 @@ arbre lire_arbre (FILE *f)
     return racine;
 }
 
+int est_feuille(noeud* a) {
+    return a != NULL && a->gauche == NULL && a->droit == NULL;
+}
 
 
 void affiche_arbre (noeud *racine)

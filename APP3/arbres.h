@@ -28,6 +28,7 @@ noeud* nouveau_noeud (void);
  */
 arbre lire_arbre (FILE *f);
 
+int est_feuille(noeud* a);
 /* Fonction d'affichage, à remplir */
 void affiche_arbre (arbre);
 
