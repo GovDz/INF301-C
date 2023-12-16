@@ -143,14 +143,146 @@ int ajouter_espece(arbre *a, char *espece, cellule_t *seq)
  * à droite, dans le fichier fout.
  * Appeler la fonction avec fout=stdin pour afficher sur la sortie standard.
  */
-void afficher_par_niveau (arbre racine, FILE* fout) {
-   printf ("<<<<< À faire: fonction afficher_par_niveau fichier " __FILE__ "\n >>>>>");
+void afficher_par_niveau(arbre a, FILE* fout) {
+    if (a == NULL) {
+        return;
+    }
+
+    // Utilisation d'un tableau pour le parcours en largeur
+    arbre tab[25000];
+    int deb = 0, niveau = 0, fini = 0, nb_elems = 1;
+
+    tab[0] = a;
+
+    // Parcours en largeur
+    while (nb_elems > 0) {
+        // Affichage de la valeur si le noeud a des sous-arbres non vides
+        if (!(tab[deb]->gauche == NULL && tab[deb]->droit == NULL)) {
+            fprintf(fout, "%s ", tab[deb]->valeur);
+        }
+
+        // Ajout du sous-arbre gauche dans le tableau si non vide
+        if (tab[deb]->gauche != NULL) {
+            fini = (fini + 1) % 25000;
+            tab[fini] = tab[deb]->gauche;
+            nb_elems++;
+        }
+
+        // Ajout du sous-arbre droit dans le tableau si non vide
+        if (tab[deb]->droit != NULL) {
+            fini = (fini + 1) % 25000;
+            tab[fini] = tab[deb]->droit;
+            nb_elems++;
+        }
+
+        // Décrémentation du nombre d'éléments restants à traiter
+        nb_elems--;
+
+        // Changement de niveau et affichage d'une nouvelle ligne si nécessaire
+        if (deb == niveau) {
+            niveau = fini;
+            fprintf(fout, "\n");
+        }
+
+        // Passage au prochain élément dans le tableau circulaire
+        deb = (deb + 1) % 25000;
+    }
 }
 
 // Acte 4
+// A l'aide de ChatGPT ( Explication du principe ) + Quelq funcs
 
+enum ErrorCode {NOEUD_VIDE = -126,ERREUR =-127 ,NOEUD_AJOUTE = -128};
+int recherche(cellule_t *seq, const char *nom) {
+    cellule_t *cel = seq;
+    while (cel != NULL) {
+        if (strcmp(cel->val, nom) == 0) {
+            return 1;
+        }
+        cel = cel->suivant;
+    }
+    return 0;
+}
+int nb_element(cellule_t *cel){
+    int count=0;
+    while (cel != NULL)
+    {
+        count++;
+        cel=cel->suivant;
+    }
+    return count;
+}
 
-int ajouter_carac(arbre* a, char* carac, cellule_t* seq) {
-   printf ("<<<<< À faire: fonction ajouter_carac fichier " __FILE__ "\n >>>>>");
-   return 0;
+int parcours_prefixe(arbre racine, const char *carac, cellule_t *seq, int nb_elem) {
+    if (racine == NULL) {
+        return NOEUD_VIDE;
+    }
+
+    if (est_feuille(racine)) {
+        return recherche(seq, racine->valeur) ? 1 : 0;
+    }
+
+    int gauche = parcours_prefixe(racine->gauche, carac, seq, nb_elem);
+
+    if (gauche == nb_elem) {
+        arbre tmp = nouveau_noeud();
+        tmp->valeur = strdup(carac);
+        tmp->droit = racine->gauche;
+        racine->gauche = tmp;
+        return NOEUD_AJOUTE;
+    }
+
+    if (gauche == NOEUD_AJOUTE || gauche == ERREUR) {
+        return gauche;
+    }
+
+    if (NOEUD_VIDE == gauche) {
+        return parcours_prefixe(racine->droit, carac, seq, nb_elem);
+    }
+
+    int droit = parcours_prefixe(racine->droit, carac, seq, nb_elem);
+
+    if (NOEUD_VIDE == droit) {
+        return gauche;
+    }
+
+    if (NOEUD_AJOUTE == droit || ERREUR == droit) {
+        return droit;
+    }
+
+    if ((gauche == 0 || droit == 0) && (gauche != 0 || droit != 0)) {
+        if (droit == nb_elem) {
+            arbre tmp = nouveau_noeud();
+            tmp->valeur = strdup(carac);
+            tmp->droit = racine->droit;
+            racine->droit = tmp;
+            return NOEUD_AJOUTE;
+        } else {
+            return ERREUR;
+        }
+    }
+    return gauche + droit;
+}
+int ajouter_carac(arbre *a, char *carac, cellule_t *seq) {
+    int nb_elem = nb_element(seq);
+    int ret = parcours_prefixe((*a), carac, seq, nb_elem);
+
+    switch (ret) {
+        case ERREUR:
+        case NOEUD_VIDE:
+            printf("Impossible d'ajouter %s\n", carac);
+            return 0;
+        case NOEUD_AJOUTE:
+            return 1;
+        default:
+            if (nb_elem == ret) {
+                arbre tmp = nouveau_noeud();
+                tmp->valeur = strdup(carac);
+                tmp->droit = (*a);
+                (*a) = tmp;
+                return 1;
+            }
+            printf("Impossible d'ajouter %s\n", carac);
+            return 0;
+    }
 }
