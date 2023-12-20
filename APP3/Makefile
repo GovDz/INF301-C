@@ -33,6 +33,8 @@ acte4: acte4.o $(OBJS)
 # Ici, on utilise l'"intelligence" de 'make' qui saura tout seul
 # comment créer les .o à partir des .c
 main: main.o arbresphylo.o arbres.o listes.o
+image:
+	dot -Tsvg -o affichage.svg affichage.dot
 
 clean:
-	rm -f main *.o
+	rm -f main *.o affichage.svg acte?? acte?
